@@ -1,5 +1,6 @@
 /*
   GTA 2019-10-27
+  GTA 2019-11-02
 */
 
 DROP FUNCTION IF EXISTS parse_text(p_input text, p_tag_open char, p_tag_close char);
@@ -7,11 +8,11 @@ CREATE OR REPLACE FUNCTION parse_text(p_input text, p_tag_open char DEFAULT '<',
 RETURNS TABLE(
   lp integer,
   item_is_tag boolean,  
-  item text,
+  item_pretty text,
   item_size integer,
   item_start integer,
   item_end integer,
-  item_pretty text  
+  item_raw text  
 ) AS 
 $BODY$
 DECLARE TAG_OPEN text = p_tag_open;
@@ -21,6 +22,8 @@ DECLARE v_curr_index integer;
 DECLARE v_tag_start integer;
 DECLARE v_raw_start integer;
 DECLARE v_char text;
+
+DECLARE v_item_raw text;
 DECLARE v_item_pretty text;
 BEGIN
 /*
@@ -74,8 +77,11 @@ SELECT * FROM parse_text(NULL, '{', '}');
         item_start:= v_raw_start;
         item_end:= v_curr_index-1;
         item_size:= item_end - item_start + 1;
-        item:= SUBSTRING(p_input, item_start, item_size);  
-        item_pretty:= v_item_pretty;
+        
+        item_raw:= SUBSTRING(p_input, item_start, item_size);          
+        item_pretty:= v_item_pretty;   
+        --item:= SUBSTRING(p_input, item_start, item_size);  
+        --item_pretty:= v_item_pretty;
 
         v_item_pretty:= '';
         v_raw_start:= NULL;
@@ -99,9 +105,9 @@ SELECT * FROM parse_text(NULL, '{', '}');
           item_start:= v_tag_start;
           item_end:= v_curr_index;
           item_size:= item_end - item_start + 1;
-          item:= SUBSTRING(p_input, item_start, item_size);
-          item_pretty:= item;
-          
+          item_raw:= SUBSTRING(p_input, item_start, item_size);        
+          item_pretty:= item_raw;            
+
           v_tag_start:= 0;
           v_curr_index:= v_curr_index + 1;
           RETURN NEXT;
@@ -142,8 +148,8 @@ SELECT * FROM parse_text(NULL, '{', '}');
     item_start:= v_raw_start;
     item_end:= v_curr_index-1;
     item_size:= item_end - item_start + 1;
-    item:= SUBSTRING(p_input, item_start, item_size);  
-    item_pretty:= v_item_pretty;
+    item_raw:= SUBSTRING(p_input, item_start, item_size);  
+    item_pretty:= v_item_pretty;    
     RETURN NEXT;
   END IF;  
 END
