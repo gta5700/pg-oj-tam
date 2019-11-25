@@ -1,10 +1,11 @@
 /*
   GTA 2019-10-27
   GTA 2019-11-02
+  GTA 2019-11-25
 */
 
-DROP FUNCTION IF EXISTS parse_text(p_input text, p_tag_open char, p_tag_close char);
-CREATE OR REPLACE FUNCTION parse_text(p_input text, p_tag_open char DEFAULT '<', p_tag_close char DEFAULT '>')
+DROP FUNCTION IF EXISTS extract_tags(p_input text, p_tag_open char, p_tag_close char);
+CREATE OR REPLACE FUNCTION extract_tags(p_input text, p_tag_open char DEFAULT '<', p_tag_close char DEFAULT '>')
 RETURNS TABLE(
   lp integer,
   item_is_tag boolean,  
@@ -27,12 +28,12 @@ DECLARE v_item_raw text;
 DECLARE v_item_pretty text;
 BEGIN
 /*
-SELECT * FROM parse_text('siała <ba><<ba>> mak nie <{wiedziała}> jak a <dziad> wiedział nie <powiedział>  '||
+SELECT * FROM extract_tags('siała <ba><<ba>> mak nie <{wiedziała}> jak a <dziad> wiedział nie <powiedział>  '||
                          'a to było tak: było morze w morzu kołek a ten kołek miał <wierzchołek>, '||
                          'na wierzchołku siedział zając o <nożkami> przebierając śpiewał tak',
                          '<', '>');
-SELECT * FROM parse_text('siała {ba}<ba> mak nie <wie{dz}iała> jak a {dzIAd} wiedział {{{}}}nie <powiedział>', '{', '}');
-SELECT * FROM parse_text(NULL, '{', '}');
+SELECT * FROM extract_tags('siała {ba}<ba> mak nie <wie{dz}iała> jak a {dzIAd} wiedział {{{}}}nie <powiedział>', '{', '}');
+SELECT * FROM extract_tags(NULL, '{', '}');
 */
 
   IF p_input IS NULL THEN
@@ -40,15 +41,15 @@ SELECT * FROM parse_text(NULL, '{', '}');
   END IF;
 
   IF p_tag_open IS NULL THEN
-    RAISE EXCEPTION  'pg_temp.parse_text -> p_tag_open IS NULL'; 
+    RAISE EXCEPTION  'extract_tags -> p_tag_open IS NULL'; 
   END IF;
   
   IF p_tag_close IS NULL THEN
-    RAISE EXCEPTION  'pg_temp.parse_text -> p_tag_close IS NULL'; 
+    RAISE EXCEPTION  'extract_tags -> p_tag_close IS NULL'; 
   END IF;
   
   IF p_tag_open = p_tag_close THEN
-    RAISE EXCEPTION  'pg_temp.parse_text -> p_tag_open = p_tag_close'; 
+    RAISE EXCEPTION  'extract_tags -> p_tag_open = p_tag_close'; 
   END IF;
 
 
